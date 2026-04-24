@@ -1,0 +1,8 @@
+{
+  "name": "NutriAI: Estimador de Salud y Calorías",
+  "description": "Aplicación integral para el seguimiento de dieta con estimación de calorías por IA, calculadora de IMC y registro de actividad física.",
+  "requestFramePermissions": [
+    "camera",
+    "geolocation"
+  ]
+}

@@ -1,0 +1,103 @@
+{
+  "entities": {
+    "UserProfile": {
+      "title": "User Profile",
+      "description": "Personal data for health calculations",
+      "type": "object",
+      "properties": {
+        "uid": { "type": "string" },
+        "displayName": { "type": "string" },
+        "age": { "type": "number" },
+        "gender": { "type": "string", "enum": ["male", "female", "other"] },
+        "height": { "type": "number", "description": "Height in cm" },
+        "weight": { "type": "number", "description": "Weight in kg" },
+        "activityLevel": { "type": "string", "enum": ["sedentary", "light", "moderate", "active", "very_active"] },
+        "goal": { "type": "string", "enum": ["lose", "maintain", "gain"] },
+        "targetWeight": { "type": "number" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["uid", "age", "gender", "height", "weight", "activityLevel"]
+    },
+    "MealRecord": {
+      "title": "Meal Record",
+      "description": "Record of a meal consumed",
+      "type": "object",
+      "properties": {
+        "uid": { "type": "string" },
+        "mealType": { "type": "string", "enum": ["breakfast", "lunch", "dinner", "snack"] },
+        "description": { "type": "string" },
+        "calories": { "type": "number" },
+        "protein": { "type": "number" },
+        "carbs": { "type": "number" },
+        "fat": { "type": "number" },
+        "imageUrl": { "type": "string" },
+        "timestamp": { "type": "string", "format": "date-time" }
+      },
+      "required": ["uid", "calories", "timestamp"]
+    },
+    "ActivityRecord": {
+      "title": "Activity Record",
+      "description": "Record of physical activity",
+      "type": "object",
+      "properties": {
+        "uid": { "type": "string" },
+        "activityName": { "type": "string" },
+        "durationMinutes": { "type": "number" },
+        "caloriesBurned": { "type": "number" },
+        "timestamp": { "type": "string", "format": "date-time" }
+      },
+      "required": ["uid", "activityName", "durationMinutes", "caloriesBurned", "timestamp"]
+    },
+    "HealthPlan": {
+      "title": "Health Plan",
+      "description": "AI generated diet and training plan",
+      "type": "object",
+      "properties": {
+        "diet": {
+          "type": "object",
+          "properties": {
+            "breakfast": { "type": "string" },
+            "lunch": { "type": "string" },
+            "dinner": { "type": "string" },
+            "snacks": { "type": "string" },
+            "tips": { "type": "array", "items": { "type": "string" } }
+          }
+        },
+        "training": {
+          "type": "object",
+          "properties": {
+            "routine": { 
+              "type": "array", 
+              "items": { 
+                "type": "object",
+                "properties": {
+                  "day": { "type": "string" },
+                  "activity": { "type": "string" }
+                }
+              }
+            },
+            "recommendations": { "type": "array", "items": { "type": "string" } }
+          }
+        }
+      }
+    }
+  },
+  "firestore": {
+    "/users/{userId}": {
+      "schema": "UserProfile",
+      "description": "User profile documents"
+    },
+    "/users/{userId}/meals/{mealId}": {
+      "schema": "MealRecord",
+      "description": "Meal history for a user"
+    },
+    "/users/{userId}/activities/{activityId}": {
+      "schema": "ActivityRecord",
+      "description": "Activity history for a user"
+    },
+    "/users/{userId}/planning/current": {
+      "schema": "HealthPlan",
+      "description": "Current AI health plan"
+    }
+  }
+}

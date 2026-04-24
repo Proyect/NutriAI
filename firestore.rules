@@ -1,0 +1,71 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Helper Functions
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+    
+    function isOwner(userId) {
+      return isAuthenticated() && request.auth.uid == userId;
+    }
+
+    function isAdmin() {
+      return isAuthenticated() && 
+        (request.auth.token.email == "marcelodiaz96@gmail.com" && request.auth.token.email_verified == true);
+    }
+
+    function isValidUser(data) {
+      return data.keys().hasAll(['uid', 'age', 'gender', 'height', 'weight', 'activityLevel']) &&
+             data.uid == request.auth.uid &&
+             data.age is number && data.age > 0 && data.age < 120 &&
+             data.gender in ['male', 'female', 'other'] &&
+             data.height is number && data.height > 50 && data.height < 300 &&
+             data.weight is number && data.weight > 20 && data.weight < 500 &&
+             data.activityLevel in ['sedentary', 'light', 'moderate', 'active', 'very_active'];
+    }
+
+    function isValidMeal(data) {
+      return data.keys().hasAll(['calories', 'timestamp']) &&
+             data.calories is number && data.calories >= 0 &&
+             (data.timestamp is timestamp || data.timestamp is string);
+    }
+
+    function isValidActivity(data) {
+      return data.keys().hasAll(['activityName', 'durationMinutes', 'caloriesBurned', 'timestamp']) &&
+             data.activityName is string &&
+             data.durationMinutes is number && data.durationMinutes > 0 &&
+             data.caloriesBurned is number && data.caloriesBurned >= 0 &&
+             (data.timestamp is timestamp || data.timestamp is string);
+    }
+
+    // User Profile Rules
+    match /users/{userId} {
+      allow read: if isOwner(userId) || isAdmin();
+      allow create: if isOwner(userId) && isValidUser(request.resource.data);
+      allow update: if isOwner(userId) && isValidUser(request.resource.data);
+      
+      // Meals Subcollection
+      match /meals/{mealId} {
+        allow read: if isOwner(userId) || isAdmin();
+        allow create: if isOwner(userId) && isValidMeal(request.resource.data);
+        allow update: if isOwner(userId) && isValidMeal(request.resource.data);
+        allow delete: if isOwner(userId);
+      }
+      
+      // Activities Subcollection
+      match /activities/{activityId} {
+        allow read: if isOwner(userId) || isAdmin();
+        allow create: if isOwner(userId) && isValidActivity(request.resource.data);
+        allow update: if isOwner(userId) && isValidActivity(request.resource.data);
+        allow delete: if isOwner(userId);
+      }
+
+      // Planning Subcollection
+      match /planning/{planId} {
+        allow read: if isOwner(userId) || isAdmin();
+        allow write: if isOwner(userId);
+      }
+    }
+  }
+}
